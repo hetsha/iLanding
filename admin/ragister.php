@@ -2,10 +2,6 @@
 session_start();
 require_once 'config/db.php';
 
-if (isset($_SESSION['admin_id'])) {
-    header("Location: dashboard.php");
-    exit();
-}
 
 $errors = [];
 
@@ -42,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $conn->prepare("INSERT INTO admins (username, password) VALUES (?, ?)");
         $stmt->bind_param("ss", $username, $hashed_password);
-        
+
         if ($stmt->execute()) {
             $_SESSION['success_message'] = "Registration successful! You can now login.";
             header("Location: login.php");

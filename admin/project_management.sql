@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 23, 2025 at 06:32 PM
+-- Generation Time: Jan 24, 2025 at 06:47 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,6 +34,13 @@ CREATE TABLE `admins` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `admins`
+--
+
+INSERT INTO `admins` (`id`, `username`, `password`, `created_at`) VALUES
+(1, 'admin', '$2y$10$eiN8oswiQYnC5gy9OudlVuo/GTXkm5TDu8Q1ki/RVdiMr0PJLhLxy', '2025-01-24 05:03:43');
+
 -- --------------------------------------------------------
 
 --
@@ -47,6 +54,14 @@ CREATE TABLE `expenses` (
   `description` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `expenses`
+--
+
+INSERT INTO `expenses` (`id`, `project_id`, `amount`, `description`, `created_at`) VALUES
+(1, 1, 1500.00, 'hosting', '2025-01-24 05:13:44'),
+(2, 1, 500.00, 'hosting', '2025-01-24 05:18:52');
 
 -- --------------------------------------------------------
 
@@ -64,6 +79,13 @@ CREATE TABLE `projects` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `is_distributed` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `projects`
+--
+
+INSERT INTO `projects` (`id`, `name`, `status`, `description`, `total_income`, `total_expenses`, `created_at`, `is_distributed`) VALUES
+(1, 'watches', 'current', 'shdbhjaj', 12000.00, 2000.00, '2025-01-24 05:12:54', 0);
 
 -- --------------------------------------------------------
 
@@ -94,6 +116,13 @@ CREATE TABLE `project_income` (
   `income_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `project_income`
+--
+
+INSERT INTO `project_income` (`income_id`, `project_id`, `income_amount`, `income_description`, `income_date`) VALUES
+(1, 1, 2000.00, 'asda', '2025-01-24');
+
 -- --------------------------------------------------------
 
 --
@@ -105,6 +134,15 @@ CREATE TABLE `project_users` (
   `user_id` int(11) NOT NULL,
   `profit` decimal(10,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `project_users`
+--
+
+INSERT INTO `project_users` (`project_id`, `user_id`, `profit`) VALUES
+(1, 1, 3333.33),
+(1, 2, 3333.33),
+(1, 3, 3333.33);
 
 -- --------------------------------------------------------
 
@@ -119,6 +157,16 @@ CREATE TABLE `users` (
   `role` enum('Designer','Connector','Coder','Marketing') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `role`, `created_at`) VALUES
+(1, 'het d shah', 'hetshah6315@gmail.com', 'Coder', '2025-01-24 05:04:10'),
+(2, 'het b shah', 'hetbshah@gmail.com', 'Designer', '2025-01-24 05:04:28'),
+(3, 'Akshat shah', 'akshat@gmail.com', 'Connector', '2025-01-24 05:04:47'),
+(4, 'jainam patel', 'jainam@gmail.com', 'Connector', '2025-01-24 05:05:03');
 
 --
 -- Indexes for dumped tables
@@ -180,19 +228,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `expenses`
 --
 ALTER TABLE `expenses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `project_expenses`
@@ -204,13 +252,13 @@ ALTER TABLE `project_expenses`
 -- AUTO_INCREMENT for table `project_income`
 --
 ALTER TABLE `project_income`
-  MODIFY `income_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `income_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
