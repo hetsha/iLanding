@@ -1,7 +1,12 @@
 <?php
+
+// Include database connection
+require_once 'config/db.php';
+
+// Check if the admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    // Redirect to the login page if the user is not logged in
-    header("Location: login.php");
+    // If not, redirect to the login page
+    header("Location: index.php");
     exit();
 }
 ?>

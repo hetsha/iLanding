@@ -1,29 +1,31 @@
 <?php
-session_start();
 require_once 'config/db.php';
-require_once 'includes/auth_check.php';
+// include 'includes/auth_check.php';
 
-// Fetch project statistics
-$sql_stats = "SELECT
-    COUNT(CASE WHEN status = 'current' THEN 1 END) as current_projects,
-    COUNT(CASE WHEN status = 'break' THEN 1 END) as break_projects,
-    COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_projects,
-    SUM(total_income) as total_income,
-    SUM(total_expenses) as total_expenses
-FROM projects";
-$result_stats = $conn->query($sql_stats);
-$stats = $result_stats->fetch_assoc();
+// Get total projects
+$sql_projects = "SELECT COUNT(*) as total FROM projects";
+$result_projects = $conn->query($sql_projects);
+$total_projects = $result_projects->fetch_assoc()['total'];
 
-// Fetch recent projects
-$sql_recent = "SELECT p.*, GROUP_CONCAT(u.name) as team_members
-    FROM projects p
-    LEFT JOIN project_users pu ON p.id = pu.project_id
-    LEFT JOIN users u ON pu.user_id = u.id
-    GROUP BY p.id
-    ORDER BY p.created_at DESC
-    LIMIT 5";
+// Get total users
+$sql_users = "SELECT COUNT(*) as total FROM users";
+$result_users = $conn->query($sql_users);
+$total_users = $result_users->fetch_assoc()['total'];
+
+// Get total messages
+$sql_messages = "SELECT COUNT(*) as total FROM contacts";
+$result_messages = $conn->query($sql_messages);
+$total_messages = $result_messages->fetch_assoc()['total'];
+
+// Get recent projects
+$sql_recent = "SELECT * FROM projects ORDER BY created_at DESC LIMIT 5";
 $result_recent = $conn->query($sql_recent);
+
+// Get recent messages
+$sql_recent_messages = "SELECT * FROM contacts ORDER BY created_at DESC LIMIT 5";
+$result_recent_messages = $conn->query($sql_recent_messages);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,85 +33,113 @@ $result_recent = $conn->query($sql_recent);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+      <link href="assets/upparac6.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <style>
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .recent-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .recent-item:last-child {
+            border-bottom: none;
+        }
+    </style>
 </head>
 <body>
-<?php include 'navbar.php'; ?> <!-- Include the navbar component -->
-
+    <?php include 'navbar.php'; ?>
 
     <div class="main-content">
-        <div class="container-fluid">
-            <h2 class="mb-4">Dashboard Overview</h2>
+        <h2 class="mb-4">Dashboard Overview</h2>
 
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <h6>Current Projects</h6>
-                        <h3><?php echo $stats['current_projects']; ?></h3>
-                    </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <i class="fas fa-project-diagram stat-icon text-primary"></i>
+                    <div class="stat-number"><?php echo $total_projects; ?></div>
+                    <div class="stat-label">Total Projects</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <h6>Projects on Break</h6>
-                        <h3><?php echo $stats['break_projects']; ?></h3>
-                    </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <i class="fas fa-users stat-icon text-success"></i>
+                    <div class="stat-number"><?php echo $total_users; ?></div>
+                    <div class="stat-label">Total Users</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <h6>Completed Projects</h6>
-                        <h3><?php echo $stats['completed_projects']; ?></h3>
-                    </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card text-center">
+                    <i class="fas fa-envelope stat-icon text-info"></i>
+                    <div class="stat-number"><?php echo $total_messages; ?></div>
+                    <div class="stat-label">Total Messages</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <h6>Total Profit</h6>
-                        <h3>₹<?php echo number_format($stats['total_income'] - $stats['total_expenses']); ?></h3>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Projects</h5>
+                        <a href="projects.php" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <?php if ($result_recent->num_rows > 0): ?>
+                            <?php while($project = $result_recent->fetch_assoc()): ?>
+                                <div class="recent-item">
+                                    <h6 class="mb-1"><?php echo htmlspecialchars($project['name']); ?></h6>
+                                    <small class="text-muted">Added: <?php echo date('M d, Y', strtotime($project['created_at'])); ?></small>
+                                </div>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p class="text-muted">No recent projects</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
 
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Recent Projects</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Project Name</th>
-                                            <th>Status</th>
-                                            <th>Team Members</th>
-                                            <th>Income</th>
-                                            <th>Expenses</th>
-                                            <th>Profit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php while($project = $result_recent->fetch_assoc()): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($project['name']); ?></td>
-                                            <td>
-                                                <span class="badge bg-<?php
-                                                    echo $project['status'] == 'current' ? 'primary' :
-                                                        ($project['status'] == 'break' ? 'warning' : 'success');
-                                                ?>">
-                                                    <?php echo ucfirst($project['status']); ?>
-                                                </span>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($project['team_members']); ?></td>
-                                            <td>₹<?php echo number_format($project['total_income']); ?></td>
-                                            <td>₹<?php echo number_format($project['total_expenses']); ?></td>
-                                            <td>₹<?php echo number_format($project['total_income'] - $project['total_expenses']); ?></td>
-                                        </tr>
-                                        <?php endwhile; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Messages</h5>
+                        <a href="view_contacts.php" class="btn btn-sm btn-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <?php if ($result_recent_messages->num_rows > 0): ?>
+                            <?php while($message = $result_recent_messages->fetch_assoc()): ?>
+                                <div class="recent-item">
+                                    <h6 class="mb-1"><?php echo htmlspecialchars($message['name']); ?></h6>
+                                    <p class="mb-1 small"><?php echo substr(htmlspecialchars($message['message']), 0, 100) . '...'; ?></p>
+                                    <small class="text-muted">Received: <?php echo date('M d, Y', strtotime($message['created_at'])); ?></small>
+                                </div>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <p class="text-muted">No recent messages</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
