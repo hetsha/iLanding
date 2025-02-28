@@ -112,6 +112,7 @@ $result = $conn->query($sql);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -122,116 +123,127 @@ $result = $conn->query($sql);
     <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 </head>
 
-<body>
+<div?>
     <?php include 'navbar.php'; ?>
 
-    <div class="main-content container">
+    <div class="main-content container" data-aos="fade-down" data-aos-delay="100">
         <h2>Project Management</h2>
         <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addProjectModal">Add New Project</button>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Project Name</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($project = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($project['project_name']); ?></td>
-                        <td><?php echo htmlspecialchars($project['project_description']); ?></td>
-                        <td><?php echo htmlspecialchars($project['status']); ?></td>
-                        <td>
-                        <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editProjectModal" onclick="editProject(<?php echo $project['project_id']; ?>)">Edit</button>
-                            <form method="POST" style="display:inline;">
-                                <input type="hidden" name="action" value="delete_project">
-                                <input type="hidden" name="project_id" value="<?php echo $project['project_id']; ?>">
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this project?');">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Add Project Modal -->
-    <div class="modal fade" id="addProjectModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="add_project">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Add Project</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="row" data-aos="fade-up" data-aos-delay="200">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Project Name</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while ($project = $result->fetch_assoc()): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($project['project_name']); ?></td>
+                                            <td><?php echo htmlspecialchars($project['project_description']); ?></td>
+                                            <td><?php echo htmlspecialchars($project['status']); ?></td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editProjectModal" onclick="editProject(<?php echo $project['project_id']; ?>)">Edit</button>
+                                                <form method="POST" style="display:inline;">
+                                                    <input type="hidden" name="action" value="delete_project">
+                                                    <input type="hidden" name="project_id" value="<?php echo $project['project_id']; ?>">
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this project?');">Delete</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <label>Project Name:</label>
-                        <input type="text" class="form-control" name="name" required>
-                        <label>Status:</label>
-                        <select class="form-control" name="status" required>
-                            <option value="current">Current</option>
-                            <option value="break">Break</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                        <label>Description:</label>
-                        <textarea class="form-control" name="description" required></textarea>
-                        <label>Project Link:</label>
-                        <input type="url" class="form-control" name="project_link" required>
-                        <label>Images:</label>
-                        <input type="file" class="form-control" name="image1">
-                        <input type="file" class="form-control" name="image2">
-                        <input type="file" class="form-control" name="image3">
-                        <input type="file" class="form-control" name="image4">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Save Project</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Edit Project Modal -->
-<div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="editProjectModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="action" value="update_project">
-                <input type="hidden" name="project_id" id="edit_project_id">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editProjectModalLabel">Edit Project</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Add Project Modal -->
+        <div class="modal fade" id="addProjectModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="add_project">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add Project</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label>Project Name:</label>
+                            <input type="text" class="form-control" name="name" required>
+                            <label>Status:</label>
+                            <select class="form-control" name="status" required>
+                                <option value="current">Current</option>
+                                <option value="break">Break</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <label>Description:</label>
+                            <textarea class="form-control" name="description" required></textarea>
+                            <label>Project Link:</label>
+                            <input type="url" class="form-control" name="project_link" required>
+                            <label>Images:</label>
+                            <input type="file" class="form-control" name="image1">
+                            <input type="file" class="form-control" name="image2">
+                            <input type="file" class="form-control" name="image3">
+                            <input type="file" class="form-control" name="image4">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Save Project</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="modal-body">
-                    <label>Project Name:</label>
-                    <input type="text" class="form-control" name="name" id="edit_project_name" required>
-                    <label>Status:</label>
-                    <select class="form-control" name="status" id="edit_project_status" required>
-                        <option value="current">Current</option>
-                        <option value="break">Break</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                    <label>Description:</label>
-                    <textarea class="form-control" name="description" id="edit_project_description" required></textarea>
-                    <label>Project Link:</label>
-                    <input type="url" class="form-control" name="project_link" id="edit_project_link" required>
-                    <label>Images:</label>
-                    <input type="file" class="form-control" name="image1">
-                    <input type="file" class="form-control" name="image2">
-                    <input type="file" class="form-control" name="image3">
-                    <input type="file" class="form-control" name="image4">
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
-</div>
 
-</body>
+        <!-- Edit Project Modal -->
+        <div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="editProjectModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="update_project">
+                        <input type="hidden" name="project_id" id="edit_project_id">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editProjectModalLabel">Edit Project</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label>Project Name:</label>
+                            <input type="text" class="form-control" name="name" id="edit_project_name" required>
+                            <label>Status:</label>
+                            <select class="form-control" name="status" id="edit_project_status" required>
+                                <option value="current">Current</option>
+                                <option value="break">Break</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <label>Description:</label>
+                            <textarea class="form-control" name="description" id="edit_project_description" required></textarea>
+                            <label>Project Link:</label>
+                            <input type="url" class="form-control" name="project_link" id="edit_project_link" required>
+                            <label>Images:</label>
+                            <input type="file" class="form-control" name="image1">
+                            <input type="file" class="form-control" name="image2">
+                            <input type="file" class="form-control" name="image3">
+                            <input type="file" class="form-control" name="image4">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        </body>
+
 </html>

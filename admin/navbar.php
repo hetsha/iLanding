@@ -9,6 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- AOS CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+
     <link href="assets/upparac6.png" rel="icon">
     <style>
         :root {
@@ -25,7 +28,7 @@
             height: 100%;
             width: var(--sidebar-width);
             background: var(--primary-color);
-            padding-top: 20px;
+            padding-top: 10px;
             color: white;
             transition: all 0.3s ease;
             z-index: 1000;
@@ -38,8 +41,8 @@
         }
 
         .sidebar-header img {
-            max-width: 120px;
-            margin-bottom: 10px;
+            max-width: 90px;
+            margin-bottom: 1px;
         }
 
         .main-content {
@@ -85,6 +88,13 @@
             padding: 8px 12px;
             border-radius: 4px;
         }
+        .finance-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -115,12 +125,15 @@
             <img src="assets/upparac6.png" alt="upparac-web-devlopment">
             <h5>Admin Panel</h5>
         </div>
-        <nav class="mt-3">
+        <nav class="mt-3" >
             <a href="dashboard.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : ''; ?>">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
             <a href="projects.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'projects.php' ? 'active' : ''; ?>">
                 <i class="fas fa-project-diagram"></i> Projects
+            </a>
+            <a href="transection.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'transection.php' ? 'active' : ''; ?>">
+                <i class="fas fa-exchange"></i> transection
             </a>
             <a href="portfolio.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'portfolio.php' ? 'active' : ''; ?>">
                 <i class="fas fa-briefcase"></i> Portfolio
@@ -159,5 +172,11 @@
             document.querySelector('.sidebar').classList.toggle('active');
         });
     </script>
+    <!-- AOS JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+
 </body>
 </html>

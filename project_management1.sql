@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 28, 2025 at 05:39 PM
+-- Generation Time: Feb 28, 2025 at 04:33 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -35,15 +35,6 @@ CREATE TABLE `admins` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `admins`
---
-
-INSERT INTO `admins` (`id`, `username`, `password`, `last_login`, `created_at`) VALUES
-(1, 'admin1', 'hashed_password_1', '2025-02-28 10:00:00', '2025-02-28 12:21:56'),
-(2, 'admin2', 'hashed_password_2', '2025-02-28 11:00:00', '2025-02-28 12:21:56'),
-(3, 'Het', '$2y$10$J7bIpm5YuHQft42zhrKrF.zFlaPjBtO/uaDSbcchx4pWyIC3u5uBa', '2025-02-28 21:56:24', '2025-02-28 16:25:53');
-
 -- --------------------------------------------------------
 
 --
@@ -60,29 +51,6 @@ CREATE TABLE `companies` (
   `added_by` varchar(255) NOT NULL,
   `date_added` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `contacts`
---
-
-CREATE TABLE `contacts` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `subject` text NOT NULL,
-  `is_read` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `message` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `contacts`
---
-
-INSERT INTO `contacts` (`id`, `name`, `email`, `subject`, `is_read`, `created_at`, `message`) VALUES
-(1, 'Het Shah', 'hetshah6315@gmail.com', 'asd', 1, '2025-02-28 16:10:43', 'dsfsf');
 
 -- --------------------------------------------------------
 
@@ -116,13 +84,6 @@ CREATE TABLE `projects` (
   `description` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `projects`
---
-
-INSERT INTO `projects` (`id`, `name`, `status`, `description`, `created_at`) VALUES
-(6, 'test', 'current', 'easd', '2025-02-28 16:18:23');
 
 -- --------------------------------------------------------
 
@@ -184,15 +145,19 @@ CREATE TABLE `users` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `users`
+-- Table structure for table `user_profits`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `role`, `created_at`) VALUES
-(1, 'Het Patel', 'het@example.com', 'Designer', '2025-02-28 12:21:56'),
-(2, 'Jainam Shah', 'jainam@example.com', 'Connector', '2025-02-28 12:21:56'),
-(3, 'Akshat Mehta', 'akshat@example.com', 'Coder', '2025-02-28 12:21:56'),
-(4, 'Rohan Desai', 'rohan@example.com', 'Marketing', '2025-02-28 12:21:56');
+CREATE TABLE `user_profits` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
@@ -210,12 +175,6 @@ ALTER TABLE `admins`
 --
 ALTER TABLE `companies`
   ADD PRIMARY KEY (`company_id`);
-
---
--- Indexes for table `contacts`
---
-ALTER TABLE `contacts`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `portfolio_projects`
@@ -260,6 +219,14 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `email` (`email`);
 
 --
+-- Indexes for table `user_profits`
+--
+ALTER TABLE `user_profits`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `project_id` (`project_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -267,49 +234,49 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `company_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `contacts`
---
-ALTER TABLE `contacts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `company_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `portfolio_projects`
 --
 ALTER TABLE `portfolio_projects`
-  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `project_profit_shares`
 --
 ALTER TABLE `project_profit_shares`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `user_profits`
+--
+ALTER TABLE `user_profits`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -335,6 +302,13 @@ ALTER TABLE `project_users`
 ALTER TABLE `transactions`
   ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`recorded_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `user_profits`
+--
+ALTER TABLE `user_profits`
+  ADD CONSTRAINT `user_profits_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `user_profits_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

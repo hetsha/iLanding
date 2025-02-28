@@ -33,6 +33,8 @@ $result_recent_messages = $conn->query($sql_recent_messages);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
       <link href="assets/upparac6.png" rel="icon">
     <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
@@ -76,22 +78,22 @@ $result_recent_messages = $conn->query($sql_recent_messages);
     <div class="main-content">
         <h2 class="mb-4">Dashboard Overview</h2>
 
-        <div class="row">
-            <div class="col-md-4">
+        <div class="row" >
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="stat-card text-center">
                     <i class="fas fa-project-diagram stat-icon text-primary"></i>
                     <div class="stat-number"><?php echo $total_projects; ?></div>
                     <div class="stat-label">Total Projects</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4"  data-aos="fade-up" data-aos-delay="200">
                 <div class="stat-card text-center">
                     <i class="fas fa-users stat-icon text-success"></i>
                     <div class="stat-number"><?php echo $total_users; ?></div>
                     <div class="stat-label">Total Users</div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4"  data-aos="fade-up" data-aos-delay="300">
                 <div class="stat-card text-center">
                     <i class="fas fa-envelope stat-icon text-info"></i>
                     <div class="stat-number"><?php echo $total_messages; ?></div>
@@ -101,7 +103,7 @@ $result_recent_messages = $conn->query($sql_recent_messages);
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-6">
+            <div class="col-md-6"  data-aos="fade-right" data-aos-delay="100">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Recent Projects</h5>
@@ -122,7 +124,7 @@ $result_recent_messages = $conn->query($sql_recent_messages);
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-6"  data-aos="fade-left" data-aos-delay="100">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Recent Messages</h5>

@@ -4,11 +4,11 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <meta name="description" content="Upparac Web Development - A top web development and SEO company in Ahmedabad, Paldi. We build responsive websites, offer digital marketing, and SEO services to grow your business.">
-  <meta name="keywords" content="Web Development in Ahmedabad, SEO services in Paldi, Website Design, Upparac Web Development, Digital Marketing, Custom Web Solutions, Business Growth, E-commerce Development">
+  <meta name="description" content="Upparac - A top web development and social media marketing in Ahmedabad. We build responsive websites, offer digital marketing, and SEO services to grow your business.">
+  <meta name="keywords" content="Web Development in Ahmedabad,Web devlopment,logo make,social media Marketing,seo ,upparac, upparac_technology, SEO services in Paldi,web, website, Website Design, Upparac Web Development, Digital Marketing, Custom Web Solutions, Business Growth, E-commerce Development">
   <!-- <meta name="robots" content="index, follow"> -->
   <link rel="canonical" href="https://upparac.com">
-  <title>Upparac Web Development | Website Design & SEO Services in Ahmedabad, Paldi</title>
+  <title>Upparac | Website Design & Social Media marketing in Ahmedabad</title>
 
   <meta property="og:title" content="Upparac Web Development | Web Design & SEO in Ahmedabad">
   <meta property="og:description" content="Best web development and SEO services in Paldi, Ahmedabad. We create fast, responsive websites.">

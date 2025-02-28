@@ -54,7 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $sql_activity = "SELECT
     (SELECT COUNT(*) FROM projects) as total_projects,
     (SELECT COUNT(*) FROM users) as total_staff,
-    (SELECT COUNT(*) FROM expenses) as total_transactions";
+    (SELECT COUNT(*) FROM transactions WHERE transaction_type = 'expense') as total_transactions";
+
 $activity = $conn->query($sql_activity)->fetch_assoc();
 ?>
 <!DOCTYPE html>

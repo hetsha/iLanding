@@ -85,7 +85,7 @@ $result = $conn->query($sql);
 <body>
     <?php include 'navbar.php'; ?>
 
-    <div class="main-content">
+    <div class="main-content" data-aos="fade-up" data-aos-delay="300">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Company Management</h2>

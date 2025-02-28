@@ -5,22 +5,26 @@ require_once 'includes/auth_check.php';
 
 // Get total revenue, expenses, and profit
 $sql_totals = "SELECT
-    SUM(total_income) as total_revenue,
-    SUM(total_expenses) as total_expenses
-FROM projects";
+    SUM(CASE WHEN transaction_type = 'income' THEN amount ELSE 0 END) as total_revenue,
+    SUM(CASE WHEN transaction_type = 'expense' THEN amount ELSE 0 END) as total_expenses
+FROM transactions
+WHERE status = 'completed'";
+
 $result_totals = $conn->query($sql_totals);
 $totals = $result_totals->fetch_assoc();
 $total_profit = $totals['total_revenue'] - $totals['total_expenses'];
 
 // Get monthly revenue data for the chart
 $sql_monthly = "SELECT
-    DATE_FORMAT(created_at, '%Y-%m') as month,
-    SUM(total_income) as revenue,
-    SUM(total_expenses) as expenses
-FROM projects
-GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+    DATE_FORMAT(transaction_date, '%Y-%m') as month,
+    SUM(CASE WHEN transaction_type = 'income' THEN amount ELSE 0 END) as revenue,
+    SUM(CASE WHEN transaction_type = 'expense' THEN amount ELSE 0 END) as expenses
+FROM transactions
+WHERE status = 'completed'
+GROUP BY DATE_FORMAT(transaction_date, '%Y-%m')
 ORDER BY month DESC
 LIMIT 12";
+
 $result_monthly = $conn->query($sql_monthly);
 $monthly_data = [];
 while($row = $result_monthly->fetch_assoc()) {
@@ -30,14 +34,22 @@ while($row = $result_monthly->fetch_assoc()) {
 // Get project-wise financial data
 $sql_projects = "SELECT
     p.name,
-    p.total_income,
-    p.total_expenses,
     p.status,
-    COUNT(DISTINCT pu.user_id) as team_size
+    (SELECT COUNT(DISTINCT pu.user_id) FROM project_users pu WHERE pu.project_id = p.id) AS team_size,
+    COALESCE(financial_data.total_income, 0) AS total_income,
+    COALESCE(financial_data.total_expenses, 0) AS total_expenses
 FROM projects p
-LEFT JOIN project_users pu ON p.id = pu.project_id
-GROUP BY p.id
+LEFT JOIN (
+    SELECT
+        t.project_id,
+        SUM(CASE WHEN t.transaction_type = 'income' THEN t.amount ELSE 0 END) AS total_income,
+        SUM(CASE WHEN t.transaction_type = 'expense' THEN t.amount ELSE 0 END) AS total_expenses
+    FROM transactions t
+    WHERE t.status = 'completed'
+    GROUP BY t.project_id
+) AS financial_data ON p.id = financial_data.project_id
 ORDER BY p.created_at DESC";
+
 $result_projects = $conn->query($sql_projects);
 ?>
 <!DOCTYPE html>
@@ -102,9 +114,9 @@ $result_projects = $conn->query($sql_projects);
 
     <div class="main-content">
         <div class="container-fluid">
-            <h2 class="mb-4">Financial Overview</h2>
+            <h2 class="mb-4" data-aos="fade-right" data-aos-delay="100">Financial Overview</h2>
 
-            <div class="row">
+            <div class="row" data-aos="fade-up" data-aos-delay="200">
                 <div class="col-md-4">
                     <div class="finance-card">
                         <h6>Total Revenue</h6>
@@ -125,7 +137,7 @@ $result_projects = $conn->query($sql_projects);
                 </div>
             </div>
 
-            <div class="row mt-4">
+            <div class="row mt-4" data-aos="fade-right" data-aos-delay="300">
                 <div class="col-md-8">
                     <div class="finance-card">
                         <h5>Monthly Revenue vs Expenses</h5>
@@ -140,7 +152,7 @@ $result_projects = $conn->query($sql_projects);
                 </div>
             </div>
 
-            <div class="row mt-4">
+            <div class="row mt-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="col-12">
                     <div class="finance-card">
                         <h5>Project-wise Financial Summary</h5>
