@@ -177,7 +177,7 @@
 
           <div class="col-lg-3 col-md-6">
             <div class="stats-item text-center w-100 h-100">
-              <span data-purecounter-start="0" data-purecounter-end="6" data-purecounter-duration="1"
+              <span data-purecounter-start="0" data-purecounter-end="200" data-purecounter-duration="1"
                 class="purecounter"></span>
               <p>Clients</p>
             </div>
@@ -185,7 +185,7 @@
 
           <div class="col-lg-3 col-md-6">
             <div class="stats-item text-center w-100 h-100">
-              <span data-purecounter-start="0" data-purecounter-end="6" data-purecounter-duration="1"
+              <span data-purecounter-start="0" data-purecounter-end="156" data-purecounter-duration="1"
                 class="purecounter"></span>
               <p>Projects</p>
             </div>
@@ -193,7 +193,7 @@
 
           <div class="col-lg-3 col-md-6">
             <div class="stats-item text-center w-100 h-100">
-              <span data-purecounter-start="0" data-purecounter-end="54" data-purecounter-duration="1"
+              <span data-purecounter-start="0" data-purecounter-end="2000" data-purecounter-duration="1"
                 class="purecounter"></span>
               <p>Hours Of Support</p>
             </div>
@@ -201,7 +201,7 @@
 
           <div class="col-lg-3 col-md-6">
             <div class="stats-item text-center w-100 h-100">
-              <span data-purecounter-start="0" data-purecounter-end="4" data-purecounter-duration="1"
+              <span data-purecounter-start="0" data-purecounter-end="23" data-purecounter-duration="1"
                 class="purecounter"></span>
               <p>Workers</p>
             </div>
@@ -217,7 +217,7 @@
     <?php include 'include/pricing.php'; ?>
 
     <!-- Faq Section -->
-    <section class="faq-9 faq section light-background" id="faq">
+    <section class="faq-9 faq section" id="faq">
 
       <div class="container">
         <div class="row">
@@ -410,7 +410,7 @@
       </div><!-- End Section Title -->
 
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
+      <div class="container  section" data-aos="fade-up" data-aos-delay="100">
 
         <div class="row g-4 g-lg-5">
           <div class="col-lg-5">
@@ -439,7 +439,6 @@
                   <p><a href="tel:+919427961426">+91 9427961426</a></p>
                   <p><a href="tel:+919328738282">+91 9328738282</a></p>
                   <p><a href="tel:+919104676701">+91 9104676701</a></p>
-
                 </div>
               </div>
 
@@ -449,7 +448,7 @@
                 </div>
                 <div class="content">
                   <h4>Email Address</h4>
-                  <p class="mt-3"><strong>Email:</strong> <a href="mailto:upparactechnology@gmail.com">upparactechnology@gmail.com</a></p>
+                  <!-- <p class="mt-3"><strong>Email:</strong> <a href="mailto:upparactechnology@gmail.com">upparactechnology@gmail.com</a></p> -->
                   <p class="mt-3"><strong>Email:</strong> <a href="mailto:contact@upparac.com">contact@upparac.com</a></p>
                 </div>
               </div>

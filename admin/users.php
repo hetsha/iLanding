@@ -66,25 +66,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Fetch all staff members with their project assignments and profits
-$sql = "SELECT
+$sql = "WITH general_profit AS (
+    -- Calculate overall general profit/loss (transactions without a project)
+    SELECT
+        (SUM(CASE WHEN transaction_type = 'income' THEN amount ELSE 0 END) -
+         SUM(CASE WHEN transaction_type = 'expense' THEN amount ELSE 0 END)) AS total_general_profit
+    FROM transactions WHERE project_id IS NULL
+),
+project_profits AS (
+    -- Calculate profit for each project
+    SELECT
+        t.project_id,
+        (SUM(CASE WHEN t.transaction_type = 'income' THEN t.amount ELSE 0 END) -
+         SUM(CASE WHEN t.transaction_type = 'expense' THEN t.amount ELSE 0 END)) AS project_profit
+    FROM transactions t
+    WHERE t.project_id IS NOT NULL
+    GROUP BY t.project_id
+),
+distributed_project_profits AS (
+    -- Distribute general profit to projects proportionally
+    SELECT
+        pp.project_id,
+        pp.project_profit + (
+            (gp.total_general_profit * (pp.project_profit / NULLIF(
+                (SELECT SUM(project_profit) FROM project_profits), 0)))
+        ) AS final_project_profit
+    FROM project_profits pp
+    CROSS JOIN general_profit gp
+),
+user_project_counts AS (
+    -- Count users per project
+    SELECT project_id, COUNT(user_id) AS user_count
+    FROM project_users
+    GROUP BY project_id
+)
+SELECT
     u.id AS id,
     u.name AS name,
     u.email AS email,
     u.role AS role,
     GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ') AS assigned_projects,
-    (SUM(CASE WHEN t.transaction_type = 'income' THEN t.amount ELSE 0 END) -
-     SUM(CASE WHEN t.transaction_type = 'expense' THEN t.amount ELSE 0 END))
-     AS total_project_profit,
-    COUNT(DISTINCT pu.project_id) AS assigned_project_count,
-    IFNULL(SUM(
-        (CASE WHEN t.transaction_type = 'income' THEN t.amount ELSE 0 END) -
-        (CASE WHEN t.transaction_type = 'expense' THEN t.amount ELSE 0 END)
-    ) / NULLIF((SELECT COUNT(*) FROM project_users WHERE project_id = pu.project_id), 0), 0)
-    AS profit_per_user
+
+    -- Total profit from assigned projects
+    COALESCE((
+        SELECT SUM(dpp.final_project_profit)
+        FROM distributed_project_profits dpp
+        WHERE dpp.project_id IN (
+            SELECT pu.project_id FROM project_users pu WHERE pu.user_id = u.id
+        )
+    ), 0) AS total_project_profit,
+
+    -- Profit per user (distributed among project members)
+    COALESCE((
+        SELECT SUM(dpp.final_project_profit / NULLIF(upc.user_count, 0))
+        FROM distributed_project_profits dpp
+        JOIN user_project_counts upc ON dpp.project_id = upc.project_id
+        WHERE dpp.project_id IN (
+            SELECT pu.project_id FROM project_users pu WHERE pu.user_id = u.id
+        )
+    ), 0) AS profit_per_user
+
 FROM users u
 LEFT JOIN project_users pu ON u.id = pu.user_id
 LEFT JOIN projects p ON pu.project_id = p.id
-LEFT JOIN transactions t ON pu.project_id = t.project_id
 GROUP BY u.id, u.name, u.email, u.role
 ORDER BY total_project_profit DESC";
 

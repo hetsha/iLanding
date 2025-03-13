@@ -12,11 +12,11 @@
             <!-- <p class="mt-3"><strong>Phone:</strong> <span>+91 9427961426</span></p> -->
             <!-- <p class="mt-3"><strong>Phone:</strong> <span>+91 9427961426</span></p> -->
             <p class="mt-3"><strong>Phone:</strong>
-            <br><a href="tel:+919825079765">+91 98250 79765</a>
-            <br><a href="tel:+919104676701">+91 91046 76701</a>
+            <br><a href="tel:+919825079765" style="color:black;">+91 98250 79765</a>
+            <br><a href="tel:+919104676701" style="color:black;">+91 91046 76701</a>
           </p>
-            <p><strong>Email:</strong> <span>upparactechnology@gmail.com</span></p>
-            <p> <span>contact@upparac.com</span></p>
+            <p><strong>Email:</strong> <br><span>contact@upparac.com</span></p>
+            <!-- <p> <span></span></p> -->
           </div>
         </div>
         <div class="col-lg-2 col-md-3 footer-links">

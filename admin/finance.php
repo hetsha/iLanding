@@ -115,7 +115,6 @@ $result_projects = $conn->query($sql_projects);
     <div class="main-content">
         <div class="container-fluid">
             <h2 class="mb-4" data-aos="fade-right" data-aos-delay="100">Financial Overview</h2>
-
             <div class="row" data-aos="fade-up" data-aos-delay="200">
                 <div class="col-md-4">
                     <div class="finance-card">
