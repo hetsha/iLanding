@@ -1,5 +1,11 @@
 <?php
 require 'db_connect.php';
+header('Content-Type: application/json');
+
+// Error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $transaction_id = $_POST['transaction_id'] ?? null;
@@ -34,15 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $oldUserId = $oldTransaction['user_id'];
         $oldProjectId = $oldTransaction['project_id'];
 
-        // Reverse old transaction effect
+        // Reverse old transaction effect (wallet or project finances)
         if ($oldType === 'deposit' || $oldType === 'withdrawal') {
             $walletUpdate = ($oldType === 'deposit') ? -$oldAmount : $oldAmount;
-            $stmt = $conn->prepare("UPDATE user_wallets SET amount = amount + ? WHERE user_id = ?");
+            $stmt = $conn->prepare("UPDATE user_wallets SET balance = balance + ? WHERE user_id = ?");
             $stmt->bind_param("di", $walletUpdate, $oldUserId);
             $stmt->execute();
             $stmt->close();
         } elseif ($oldType === 'income' || $oldType === 'expense') {
-            // Reverse only if project-related finance exists
+            // Reverse only if project_id exists
             if ($oldProjectId) {
                 $stmt = $conn->prepare("DELETE FROM project_finances WHERE project_id = ? AND amount = ? AND type = ?");
                 $stmt->bind_param("ids", $oldProjectId, $oldAmount, $oldType);
@@ -65,29 +71,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt->close();
 
+            // Update user wallet
             $walletUpdate = ($type === 'deposit') ? $amount : -$amount;
-            $stmt = $conn->prepare("UPDATE user_wallets SET amount = amount + ? WHERE user_id = ?");
+            $stmt = $conn->prepare("UPDATE user_wallets SET balance = balance + ? WHERE user_id = ?");
             $stmt->bind_param("di", $walletUpdate, $user_id);
             $stmt->execute();
             $stmt->close();
-        } elseif ($type === 'income' || $type === 'expense') {
-            // Set user_id to NULL for income/expense
-            $user_id = null;
-
-            if ($project_id) {
-                // Project-specific income/expense
-                $stmt = $conn->prepare("INSERT INTO project_finances (project_id, amount, type, description, finance_date, created_at) VALUES (?, ?, ?, ?, NOW(), NOW())");
-                $stmt->bind_param("idss", $project_id, $amount, $type, $description);
-            } else {
-                // Company-wide income/expense
-                $stmt = $conn->prepare("INSERT INTO project_finances (project_id, amount, type, description, finance_date, created_at) VALUES (NULL, ?, ?, ?, NOW(), NOW())");
-                $stmt->bind_param("dss", $amount, $type, $description);
-            }
+        } elseif (($type === 'income' || $type === 'expense') && $project_id) {
+            // ✅ Only add to `project_finances` if project_id is available
+            $stmt = $conn->prepare("INSERT INTO project_finances (project_id, amount, type, description, finance_date, created_at) VALUES (?, ?, ?, ?, NOW(), NOW())");
+            $stmt->bind_param("idss", $project_id, $amount, $type, $description);
             $stmt->execute();
             $stmt->close();
         }
 
-        // Update the transaction record
+        // ✅ Update the transaction record in `transactions` table (always)
         if ($project_id === null) {
             $stmt = $conn->prepare("UPDATE transactions SET amount = ?, description = ?, transaction_type = ?, user_id = ?, project_id = NULL WHERE transaction_id = ?");
             $stmt->bind_param("dssii", $amount, $description, $type, $user_id, $transaction_id);
