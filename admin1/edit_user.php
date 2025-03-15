@@ -1,5 +1,7 @@
 <?php
-include 'config.php';
+session_start();
+require_once 'config.php';
+require_once 'auth_check.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = $_POST['user_id'];

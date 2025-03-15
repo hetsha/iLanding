@@ -1,6 +1,7 @@
 <?php
-include 'config.php';
 session_start();
+require_once 'config.php';
+require_once 'auth_check.php';
 
 // Fetch projects with undistributed profit
 $projectsQuery = "
@@ -103,11 +104,50 @@ exit();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profit Distribution</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
 </head>
+<style>
+     .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .recent-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .recent-item:last-child {
+        border-bottom: none;
+    }
+</style>
 <body>
 
-<div class="container">
+<div class="main-content">
     <h1>Project Profit Distribution</h1>
 
     <!-- Success / Error Messages -->
@@ -133,11 +173,11 @@ exit();
         $individualShare = $totalUsers > 0 ? $remainingProfit / $totalUsers : 0;
         ?>
 
-        <div class="card my-3">
-            <div class="card-header bg-primary text-white">
+        <div class="stat-card my-3">
+            <div class="stat-card bg-info text-white">
                 <h5 class="mb-0"><?php echo $project['name']; ?></h5>
             </div>
-            <div class="card-body">
+            <div class="card-body table table-responsive">
                 <p><strong>Net Profit:</strong> <?php echo number_format($project['net_profit'], 2); ?> USD</p>
                 <p><strong>Distributed Profit:</strong> <?php echo number_format($project['distributed_profit'], 2); ?> USD</p>
                 <p><strong>Remaining Profit:</strong> <?php echo number_format($remainingProfit, 2); ?> USD</p>
@@ -145,7 +185,7 @@ exit();
                 <p><strong>Per User Share:</strong> <?php echo number_format($individualShare, 2); ?> USD</p>
 
                 <h6>Assigned Users:</h6>
-                <ul class="list-group">
+                <ul class="finance-card">
                     <?php while ($user = mysqli_fetch_assoc($usersResult)): ?>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <?php echo $user['name']; ?>

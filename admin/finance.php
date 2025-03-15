@@ -119,7 +119,7 @@ $result_projects = $conn->query($sql_projects);
                 <div class="col-md-4">
                     <div class="finance-card">
                         <h6>Total Revenue</h6>
-                        <h3 class="text-primary">₹<?php echo number_format($totals['total_revenue']); ?></h3>
+                        <h3 >₹<?php echo number_format($totals['total_revenue']); ?></h3>
                     </div>
                 </div>
                 <div class="col-md-4">

@@ -1,6 +1,7 @@
 <?php
-include 'config.php';
 session_start();
+require_once 'config.php';
+require_once 'auth_check.php';
 
 // Handle deposit/withdrawal transactions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -57,12 +58,51 @@ $walletResult = mysqli_query($conn, $walletQuery);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Wallets</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Users</title>
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
 </head>
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .recent-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .recent-item:last-child {
+        border-bottom: none;
+    }
+</style>
 <body>
 
-<div class="container">
+<div class="main-content">
     <h1 class="my-4">User Wallets</h1>
 
     <!-- Success / Error Messages -->
@@ -79,20 +119,22 @@ $walletResult = mysqli_query($conn, $walletQuery);
         mysqli_data_seek($usersBalanceResult, 0);  // Reset pointer to reuse the query result
         while ($userBalance = mysqli_fetch_assoc($usersBalanceResult)) { ?>
             <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><?php echo $userBalance['name']; ?></h5>
-                        <h6 class="card-subtitle mb-2 text-muted">Balance</h6>
-                        <p class="card-text"><?php echo number_format($userBalance['balance'], 2); ?> USD</p>
+                    <div class="stat-card text-center">
+                        <h5 class="stat-number"><?php echo $userBalance['name']; ?></h5>
+                        <h4 class="card-subtitle mb-2 text-muted">Balance</h4>
+                        <h3 class="card-text">₹ <?php echo number_format($userBalance['balance'], 2); ?></h3>
                     </div>
-                </div>
             </div>
         <?php } ?>
     </div>
+    <!-- Wallet Transactions Button -->
+    <button class="btn btn-info mb-3" data-toggle="modal" data-target="#walletTransactionsModal">View All Transactions</button>
 
     <!-- User List with Edit and Delete Options -->
+<div class="finance-card">
     <h3 class="my-3">Manage Users</h3>
-    <table class="table table-bordered">
+
+    <table class="table table-responsive">
     <thead>
         <tr>
             <th>ID</th>
@@ -110,7 +152,7 @@ $walletResult = mysqli_query($conn, $walletQuery);
                 <td><?php echo $user['user_id']; ?></td>
                 <td><?php echo $user['name']; ?></td>
                 <td><?php echo $user['email']; ?></td>
-                <td><?php echo number_format($user['balance'], 2); ?> USD</td>
+                <td>₹ <?php echo number_format($user['balance'], 2); ?></td>
                 <td>
                     <button class="btn btn-warning btn-sm editUserBtn"
                             data-id="<?php echo $user['user_id']; ?>"
@@ -125,6 +167,7 @@ $walletResult = mysqli_query($conn, $walletQuery);
         <?php } ?>
     </tbody>
     </table>
+    </div>
     <!-- Add Transaction Form -->
     <form action="user_wallets.php" method="POST" class="mb-4">
         <h3 class="my-3">Add Transaction</h3>
@@ -150,11 +193,10 @@ $walletResult = mysqli_query($conn, $walletQuery);
                 <option value="withdrawal">Withdrawal</option>
             </select>
         </div>
+        <br>
         <button type="submit" class="btn btn-primary">Add Transaction</button>
     </form>
 
-    <!-- Wallet Transactions Button -->
-    <button class="btn btn-info mb-3" data-toggle="modal" data-target="#walletTransactionsModal">View All Transactions</button>
 
     <!-- Wallet Transactions Modal -->
     <div class="modal fade" id="walletTransactionsModal" tabindex="-1" aria-labelledby="walletTransactionsModalLabel" aria-hidden="true">
@@ -182,7 +224,7 @@ $walletResult = mysqli_query($conn, $walletQuery);
                                 <tr>
                                     <td><?php echo $wallet['user_id']; ?></td>
                                     <td><?php echo $wallet['name']; ?></td>
-                                    <td><?php echo number_format($wallet['amount'], 2); ?> USD</td>
+                                    <td>₹ <?php echo number_format($wallet['amount'], 2); ?></td>
                                     <td><?php echo ucfirst($wallet['transaction_type']); ?></td>
                                     <td><?php echo $wallet['transaction_date']; ?></td>
                                 </tr>
