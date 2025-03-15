@@ -1,18 +1,21 @@
 <?php
 require 'db_connect.php';
 
+// Fetch users and projects once
+$allUsers = $conn->query("SELECT user_id, name FROM users")->fetch_all(MYSQLI_ASSOC);
+$allProjects = $conn->query("SELECT project_id, name FROM projects")->fetch_all(MYSQLI_ASSOC);
+
 // Fetch Projects for Dropdown
 $projects = $conn->query("SELECT project_id, name FROM projects");
 
 // Fetch Users for Withdraw/Deposit
 $users = $conn->query("SELECT user_id, name FROM users");
 
-// Company-wide Financial Overview
 // Company-wide Financial Overview with Deposits and Withdrawals
 $companyFinanceQuery = $conn->query("
     SELECT
         SUM(CASE WHEN transaction_type IN ('income', 'deposit') THEN amount ELSE 0 END) AS total_income,
-        SUM(CASE WHEN transaction_type IN ('expense', 'withdraw') THEN amount ELSE 0 END) AS total_expense
+        SUM(CASE WHEN transaction_type IN ('expense', 'withdrawal') THEN amount ELSE 0 END) AS total_expense
     FROM transactions
 ");
 $companyFinance = $companyFinanceQuery->fetch_assoc();
@@ -38,7 +41,13 @@ $transactions = $conn->query("
     LEFT JOIN users u ON t.user_id = u.user_id
     ORDER BY t.transaction_date DESC
 ");
-
+// Fetch all users with their wallet balances
+$userWalletsQuery = $conn->query("
+    SELECT u.name, uw.amount
+    FROM users u
+    LEFT JOIN user_wallets uw ON u.user_id = uw.user_id
+    ORDER BY uw.amount DESC
+");
 ?>
 
 <!DOCTYPE html>
@@ -78,6 +87,19 @@ $transactions = $conn->query("
                     <div class="card-header">Company Profit</div>
                     <div class="card-body">
                         <h3 class="card-title">$<?php echo number_format($company_profit, 2); ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-header">Per User Wallet</div>
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        <?php while ($userWallet = $userWalletsQuery->fetch_assoc()): ?>
+                            <p>
+                                <strong><?php echo htmlspecialchars($userWallet['name']); ?>:</strong>
+                                $<?php echo number_format($userWallet['amount'] ?? 0, 2); ?>
+                            </p>
+                        <?php endwhile; ?>
                     </div>
                 </div>
             </div>
@@ -128,7 +150,11 @@ $transactions = $conn->query("
                                 data-amount="<?php echo $transaction['amount']; ?>"
                                 data-type="<?php echo $transaction['transaction_type']; ?>"
                                 data-description="<?php echo $transaction['description']; ?>"
-                                data-bs-toggle="modal" data-bs-target="#editTransactionModal">Edit</button>
+                                data-user-id="<?php echo $transaction['user_id'] ?? ''; ?>"
+                                data-project-id="<?php echo $transaction['project_id'] ?? ''; ?>"
+                                data-bs-toggle="modal" data-bs-target="#editTransactionModal">
+                                Edit
+                            </button>
                             <button class="btn btn-sm btn-danger delete-btn"
                                 data-id="<?php echo $transaction['transaction_id']; ?>"
                                 data-bs-toggle="modal" data-bs-target="#deleteTransactionModal">Delete</button>
@@ -138,95 +164,7 @@ $transactions = $conn->query("
             </tbody>
         </table>
     </div>
-    <!-- Add Income/Expense Modal -->
-    <div class="modal fade" id="addFinanceModal" tabindex="-1" aria-labelledby="addFinanceModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addFinanceModalLabel">Add Income/Expense</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="add_finance.php" method="POST">
-                    <div class="modal-body">
-                        <div id="transactionAlert" class="alert d-none" role="alert"></div>
-                        <div class="mb-3">
-                            <label for="transactionType" class="form-label">Transaction Type</label>
-                            <select name="transaction_type" id="transactionType" class="form-select" required>
-                                <option value="income">Income</option>
-                                <option value="expense">Expense</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="projectId" class="form-label">Project (Optional)</label>
-                            <select name="project_id" id="projectId" class="form-select">
-                                <option value="">Company-Wide</option>
-                                <?php while ($project = $projects->fetch_assoc()): ?>
-                                    <option value="<?php echo $project['project_id']; ?>"><?php echo $project['name']; ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="amount" class="form-label">Amount</label>
-                            <input type="number" step="0.01" name="amount" id="amount" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea name="description" id="description" class="form-control" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Transaction</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
-    <!-- User Deposit/Withdraw Modal -->
-    <div class="modal fade" id="userTransactionModal" tabindex="-1" aria-labelledby="userTransactionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="userTransactionModalLabel">User Deposit/Withdraw</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="userTransactionForm" action="add_user_transaction.php" method="POST">
-                    <div class="modal-body">
-                        <div id="transactionAlert" class="alert d-none" role="alert"></div>
-                        <div class="mb-3">
-                            <label for="userId" class="form-label">User</label>
-                            <select name="user_id" id="userId" class="form-select" required>
-                                <option value="">Select User</option>
-                                <?php while ($user = $users->fetch_assoc()): ?>
-                                    <option value="<?php echo $user['user_id']; ?>"><?php echo $user['name']; ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="transactionTypeUser" class="form-label">Transaction Type</label>
-                            <select name="transaction_type" id="transactionTypeUser" class="form-select" required>
-                                <option value="deposit">Deposit</option>
-                                <option value="withdraw">Withdraw</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="userAmount" class="form-label">Amount</label>
-                            <input type="number" step="0.01" name="amount" id="userAmount" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="userDescription" class="form-label">Description</label>
-                            <textarea name="description" id="userDescription" class="form-control" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
     <!-- Edit Transaction Modal -->
     <div class="modal fade" id="editTransactionModal" tabindex="-1" aria-labelledby="editTransactionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -235,19 +173,57 @@ $transactions = $conn->query("
                     <h5 class="modal-title">Edit Transaction</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="edit_transaction.php" method="POST">
+                <form id="editTransactionForm">
                     <div id="transactionAlert" class="alert d-none" role="alert"></div>
                     <div class="modal-body">
                         <input type="hidden" name="transaction_id" id="editTransactionId">
+
+                        <!-- Type Selection -->
+                        <div class="mb-3">
+                            <label for="editType" class="form-label">Transaction Type</label>
+                            <select name="type" id="editType" class="form-select" required>
+                                <option value="deposit">Deposit</option>
+                                <option value="withdrawal">Withdrawal</option>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                        </div>
+
+                        <!-- User Selection (for deposit/withdrawal) -->
+                        <div class="mb-3" id="userSelectContainer">
+                            <label for="editUserId" class="form-label">User</label>
+                            <select name="user_id" id="editUserId" class="form-select">
+                                <option value="">Select User</option>
+                                <?php foreach ($allUsers as $user): ?>
+                                    <option value="<?php echo $user['user_id']; ?>"><?php echo $user['name']; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <!-- Project Selection (for income/expense) -->
+                        <div class="mb-3" id="projectSelectContainer">
+                            <label for="editProjectId" class="form-label">Project</label>
+                            <select name="project_id" id="editProjectId" class="form-select">
+                                <option value="">Company-Wide</option>
+                                <?php foreach ($allProjects as $project): ?>
+                                    <option value="<?php echo $project['project_id']; ?>"><?php echo $project['name']; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <!-- Amount -->
                         <div class="mb-3">
                             <label for="editAmount" class="form-label">Amount</label>
                             <input type="number" step="0.01" name="amount" id="editAmount" class="form-control" required>
                         </div>
+
+                        <!-- Description -->
                         <div class="mb-3">
                             <label for="editDescription" class="form-label">Description</label>
                             <textarea name="description" id="editDescription" class="form-control" required></textarea>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update</button>
@@ -256,9 +232,8 @@ $transactions = $conn->query("
             </div>
         </div>
     </div>
-
-    <!-- Delete Transaction Modal -->
-    <div class="modal fade" id="deleteTransactionModal" tabindex="-1" aria-labelledby="deleteTransactionModalLabel" aria-hidden="true">
+<!-- Delete Transaction Modal -->
+<div class="modal fade" id="deleteTransactionModal" tabindex="-1" aria-labelledby="deleteTransactionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -279,7 +254,99 @@ $transactions = $conn->query("
             </div>
         </div>
     </div>
+
+        <!-- Add Income/Expense Modal -->
+        <div class="modal fade" id="addFinanceModal" tabindex="-1" aria-labelledby="addFinanceModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addFinanceModalLabel">Add Income/Expense</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="add_finance.php" method="POST">
+                        <div class="modal-body">
+                            <div id="transactionAlert" class="alert d-none" role="alert"></div>
+                            <div class="mb-3">
+                                <label for="transactionType" class="form-label">Transaction Type</label>
+                                <select name="transaction_type" id="transactionType" class="form-select" required>
+                                    <option value="income">Income</option>
+                                    <option value="expense">Expense</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="projectId" class="form-label">Project (Optional)</label>
+                                <select name="project_id" id="projectId" class="form-select">
+                                    <option value="">Company-Wide</option>
+                                    <?php while ($project = $projects->fetch_assoc()): ?>
+                                        <option value="<?php echo $project['project_id']; ?>"><?php echo $project['name']; ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount</label>
+                                <input type="number" step="0.01" name="amount" id="amount" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea name="description" id="description" class="form-control" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add Transaction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Deposit/Withdraw Modal -->
+        <div class="modal fade" id="userTransactionModal" tabindex="-1" aria-labelledby="userTransactionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="userTransactionModalLabel">User Deposit/Withdraw</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="userTransactionForm" action="add_user_transaction.php" method="POST">
+                        <div class="modal-body">
+                            <div id="transactionAlert" class="alert d-none" role="alert"></div>
+                            <div class="mb-3">
+                                <label for="userId" class="form-label">User</label>
+                                <select name="user_id" id="userId" class="form-select" required>
+                                    <option value="">Select User</option>
+                                    <?php while ($user = $users->fetch_assoc()): ?>
+                                        <option value="<?php echo $user['user_id']; ?>"><?php echo $user['name']; ?></option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="transactionTypeUser" class="form-label">Transaction Type</label>
+                                <select name="transaction_type" id="transactionTypeUser" class="form-select" required>
+                                    <option value="deposit">Deposit</option>
+                                    <option value="withdrawal">Withdraw</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="userAmount" class="form-label">Amount</label>
+                                <input type="number" step="0.01" name="amount" id="userAmount" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="userDescription" class="form-label">Description</label>
+                                <textarea name="description" id="userDescription" class="form-control" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     <script>
+
         // Handle User Deposit/Withdraw Form Submission
         document.getElementById('userTransactionForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -313,57 +380,81 @@ $transactions = $conn->query("
                 });
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Hide alerts when modals are closed
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                modal.addEventListener('hidden.bs.modal', () => {
-                    const alertBox = modal.querySelector('.alert');
-                    if (alertBox) {
-                        alertBox.classList.add('d-none');
-                        alertBox.textContent = '';
-                    }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const editForm = document.getElementById('editTransactionForm');
+            const alertBox = document.getElementById('transactionAlert');
+            const typeSelect = document.getElementById('editType');
+            const userSelectContainer = document.getElementById('userSelectContainer');
+            const projectSelectContainer = document.getElementById('projectSelectContainer');
+
+            // Show/hide fields based on transaction type
+            const handleTypeChange = () => {
+                const selectedType = typeSelect.value;
+                userSelectContainer.style.display = (selectedType === 'deposit' || selectedType === 'withdrawal') ? 'block' : 'none';
+                projectSelectContainer.style.display = (selectedType === 'income' || selectedType === 'expense') ? 'block' : 'none';
+            };
+
+            typeSelect.addEventListener('change', handleTypeChange);
+
+            // Populate modal fields on edit button click
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const transactionId = button.dataset.id;
+                    const transactionType = button.dataset.type;
+                    const userId = button.dataset.userId;
+                    const projectId = button.dataset.projectId;
+
+                    editForm.reset();
+                    document.getElementById('editTransactionId').value = transactionId;
+                    typeSelect.value = transactionType;
+                    document.getElementById('editAmount').value = button.dataset.amount;
+                    document.getElementById('editDescription').value = button.dataset.description;
+
+                    if (userId) document.getElementById('editUserId').value = userId;
+                    if (projectId) document.getElementById('editProjectId').value = projectId;
+
+                    const handleTypeChange = () => {
+                        const selectedType = typeSelect.value;
+                        userSelectContainer.style.display = (selectedType === 'deposit' || selectedType === 'withdrawal') ? 'block' : 'none';
+                        projectSelectContainer.style.display = (selectedType === 'income' || selectedType === 'expense') ? 'block' : 'none';
+                    };
+
                 });
             });
 
-            // Edit Transaction Form Submission
-            const editForm = document.querySelector('#editTransactionModal form');
-            editForm.addEventListener('submit', function(e) {
+            // Form submission with improved error handling
+            editForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                alertBox.classList.add('d-none'); // Hide alert initially
 
-                const formData = new FormData(editForm);
-                const alertBox = editForm.querySelector('#transactionAlert');
-
-                fetch('edit_transaction.php', {
+                try {
+                    const formData = new FormData(editForm);
+                    const response = await fetch('edit_transaction.php', {
                         method: 'POST',
                         body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        alertBox.className = data.success ? 'alert alert-success' : 'alert alert-danger';
-                        alertBox.textContent = data.message;
-                        alertBox.classList.remove('d-none');
-
-                        if (data.success) {
-                            setTimeout(() => {
-                                bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
-                                window.location.reload();
-                            }, 1000);
-                        }
-                    })
-                    .catch(error => {
-                        alertBox.className = 'alert alert-danger';
-                        alertBox.textContent = 'An error occurred. Please try again.';
-                        alertBox.classList.remove('d-none');
                     });
-            });
+                    const data = await response.json();
 
-            // Edit Transaction Button - populate modal fields
-            document.querySelectorAll('.edit-btn').forEach(button => {
+                    alertBox.textContent = data.message;
+                    alertBox.className = data.success ? 'alert alert-success' : 'alert alert-danger';
+                    alertBox.classList.remove('d-none');
+
+                    if (data.success) {
+                        setTimeout(() => window.location.reload(), 1000);
+                    }
+                } catch (error) {
+                    alertBox.textContent = 'An error occurred. Please try again.';
+                    alertBox.className = 'alert alert-danger';
+                    alertBox.classList.remove('d-none');
+                }
+            });
+        });
+
+        // Delete Transaction Button - populate modal field
+        document.querySelectorAll('.delete-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    document.getElementById('editTransactionId').value = this.dataset.id;
-                    document.getElementById('editAmount').value = this.dataset.amount;
-                    document.getElementById('editDescription').value = this.dataset.description;
+                    document.getElementById('deleteTransactionId').value = this.dataset.id;
                 });
             });
 
@@ -373,6 +464,7 @@ $transactions = $conn->query("
                 e.preventDefault();
 
                 const formData = new FormData(deleteForm);
+                console.log('Transaction ID Sent:', formData.get('transaction_id')); // Debugging
                 const alertBox = deleteForm.querySelector('#transactionAlert');
 
                 fetch('delete_transaction.php', {
@@ -381,12 +473,10 @@ $transactions = $conn->query("
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Show success or error message
                         alertBox.className = data.success ? 'alert alert-success' : 'alert alert-danger';
                         alertBox.textContent = data.message;
                         alertBox.classList.remove('d-none');
 
-                        // If successful, close the modal and reload after 1 second
                         if (data.success) {
                             setTimeout(() => {
                                 bootstrap.Modal.getInstance(document.getElementById('deleteTransactionModal')).hide();
@@ -400,7 +490,6 @@ $transactions = $conn->query("
                         alertBox.classList.remove('d-none');
                     });
             });
-        });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

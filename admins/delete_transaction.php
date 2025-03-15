@@ -16,9 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['transaction_id'])) {
     $transactionQuery->close();
 
     if (!$transaction) {
-        echo json_encode(['success' => false, 'message' => 'Transaction not found.']);
-        exit;
+        error_log("No transaction found for ID: $transaction_id");
+    } else {
+        error_log("Transaction found: " . json_encode($transaction));
     }
+
 
     $amount = $transaction['amount'];
     $transaction_type = $transaction['transaction_type'];
@@ -48,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['transaction_id'])) {
             $walletAdjustment = $transaction_type === 'deposit' ? -$amount : $amount;
             $updateUserWallet = $conn->prepare("
                 UPDATE user_wallets
-                SET balance = balance + ?
+                SET amount = amount + ?
                 WHERE user_id = ?
             ");
             $updateUserWallet->bind_param("di", $walletAdjustment, $user_id);

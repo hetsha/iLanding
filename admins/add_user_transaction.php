@@ -18,7 +18,7 @@
         }
 
         // Validate transaction type
-        if (!in_array($action, ['withdraw', 'deposit'])) {
+        if (!in_array($action, ['withdrawal', 'deposit'])) {
             $response['message'] = 'Invalid transaction type.';
             echo json_encode($response);
             exit();
@@ -37,7 +37,7 @@
             $walletQuery->close();
 
             // Handle withdraw or deposit logic
-            if ($action === 'withdraw') {
+            if ($action === 'withdrawal') {
                 if ($current_balance < $amount) {
                     $conn->rollback();
                     $response['message'] = 'Insufficient funds.';
