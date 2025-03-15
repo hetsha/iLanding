@@ -19,13 +19,13 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="dashboard.php">Dashboard</a>
+            <a class="nav-link" href="index.php">Dashboard</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="project_finances.php">Projects</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="user_management.php">Users</a>
+            <a class="nav-link" href="user_wallets.php">Users</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="transactions_log.php">Transactions</a>

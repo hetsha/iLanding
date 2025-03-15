@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 15, 2025 at 01:36 PM
+-- Generation Time: Mar 15, 2025 at 03:40 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -70,7 +70,8 @@ INSERT INTO `project_finances` (`finance_id`, `project_id`, `amount`, `type`, `d
 (2, 1, 5000.00, 'expense', 'Domain & Hosting', '2025-02-01', '2025-03-14 12:04:42'),
 (3, 2, 15000.00, 'income', 'Investor funding for mobile app', '2025-03-05', '2025-03-14 12:04:42'),
 (8, 2, 245.00, 'expense', 'sdf', '0000-00-00', '2025-03-15 08:37:33'),
-(11, 1, 2345.00, 'income', '2asdaasd', '2025-03-15', '2025-03-15 10:24:08');
+(11, 1, 2345.00, 'income', '2asdaasd', '2025-03-15', '2025-03-15 10:24:08'),
+(14, 1, 23.00, 'income', 'asdad', '2025-03-15', '2025-03-15 13:57:21');
 
 -- --------------------------------------------------------
 
@@ -91,7 +92,7 @@ CREATE TABLE `project_profit` (
 --
 
 INSERT INTO `project_profit` (`profit_id`, `project_id`, `net_profit`, `distributed_profit`, `created_at`) VALUES
-(1, 1, 5000.00, 2000.00, '2025-03-14 12:04:42'),
+(1, 1, 5000.00, 5000.00, '2025-03-14 12:04:42'),
 (2, 2, 10000.00, 3000.00, '2025-03-14 12:04:42');
 
 -- --------------------------------------------------------
@@ -185,7 +186,9 @@ INSERT INTO `transactions` (`transaction_id`, `user_id`, `project_id`, `amount`,
 (25, NULL, 2, 245.00, 'expense', NULL, 'sdf', '2025-03-15 08:37:33', NULL),
 (26, 1, NULL, 3456.00, 'deposit', NULL, 'asda', '2025-03-15 08:48:44', NULL),
 (30, 3, NULL, 2.00, 'deposit', NULL, 'sdf', '2025-03-15 08:54:40', NULL),
-(33, NULL, NULL, 2343.00, 'expense', NULL, 'asd', '2025-03-15 10:27:17', NULL);
+(33, NULL, NULL, 2343.00, 'expense', NULL, 'asd', '2025-03-15 10:27:17', NULL),
+(34, NULL, NULL, 234.00, 'income', NULL, 'asda', '2025-03-15 09:22:38', NULL),
+(35, NULL, NULL, 1111.00, 'income', NULL, 'asda', '2025-03-15 09:23:55', NULL);
 
 -- --------------------------------------------------------
 
@@ -208,7 +211,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `name`, `email`, `password_hash`, `role`, `wallet_balance`, `created_at`) VALUES
-(1, 'Alice Johnson', 'alice@example.com', 'hashedpassword1', 'admin', 5020.00, '2025-03-14 12:04:42'),
+(1, 'Alice Johnsonas', 'alice@example.com', 'hashedpassword1', 'admin', 5020.00, '2025-03-14 12:04:42'),
 (2, 'Bob Smith', 'bob@example.com', 'hashedpassword2', 'employee', 2000.00, '2025-03-14 12:04:42'),
 (3, 'Charlie Brown', 'charlie@example.com', 'hashedpassword3', 'investor', 10000.00, '2025-03-14 12:04:42');
 
@@ -232,9 +235,10 @@ CREATE TABLE `user_wallets` (
 --
 
 INSERT INTO `user_wallets` (`wallet_id`, `user_id`, `amount`, `transaction_type`, `status`, `transaction_date`) VALUES
-(1, 1, 1557.00, 'deposit', 'approved', '2025-03-14 12:04:42'),
-(2, 2, 4970.00, 'deposit', 'approved', '2025-03-14 12:04:42'),
-(3, 3, 10870.00, 'deposit', 'approved', '2025-03-14 12:04:42');
+(1, 1, 3223.67, 'deposit', 'approved', '2025-03-14 12:04:42'),
+(2, 2, 6636.67, 'deposit', 'approved', '2025-03-14 12:04:42'),
+(3, 3, 12536.67, 'deposit', 'approved', '2025-03-14 12:04:42'),
+(9, 1, 223.00, 'withdrawal', 'pending', '2025-03-15 14:16:43');
 
 -- --------------------------------------------------------
 
@@ -342,7 +346,7 @@ ALTER TABLE `projects`
 -- AUTO_INCREMENT for table `project_finances`
 --
 ALTER TABLE `project_finances`
-  MODIFY `finance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `finance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `project_profit`
@@ -366,7 +370,7 @@ ALTER TABLE `project_users`
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `transaction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -378,7 +382,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_wallets`
 --
 ALTER TABLE `user_wallets`
-  MODIFY `wallet_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `wallet_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `withdrawal_requests`
