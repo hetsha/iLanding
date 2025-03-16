@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once 'config.php';
-require_once 'auth_check.php';
 
 if (isset($_SESSION['admin_id'])) {
     header("Location: dashboard.php");
