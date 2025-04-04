@@ -1,0 +1,89 @@
+<?php
+session_start();
+require_once '../config/db.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
+
+// Fetch totals by type
+$income = $pdo->query("SELECT SUM(amount) AS total FROM transactions WHERE type = 'income'")->fetch()['total'] ?? 0;
+$expense = $pdo->query("SELECT SUM(amount) AS total FROM transactions WHERE type = 'expense'")->fetch()['total'] ?? 0;
+$profit = $income - $expense;
+
+// Equal share among 4 partners
+$partner_share = $profit / 4;
+
+// Partner withdrawals
+$withdrawals = $pdo->query("
+    SELECT u.name, SUM(t.amount) AS total
+    FROM transactions t
+    JOIN users u ON t.user_id = u.id
+    WHERE t.type = 'withdrawal' AND u.role = 'partner'
+    GROUP BY u.id
+")->fetchAll();
+
+// Calculate total partner withdrawals
+$total_partner_withdrawals = $pdo->query("
+    SELECT SUM(t.amount) AS total
+    FROM transactions t
+    JOIN users u ON t.user_id = u.id
+    WHERE t.type = 'withdrawal' AND u.role = 'partner'
+")->fetch()['total'] ?? 0;
+
+$company_balance = $profit - $total_partner_withdrawals;
+
+?>
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Financial Report</title>
+</head>
+
+<body>
+    <h2>📊 Financial Summary</h2>
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Total Income</th>
+            <td>₹<?= number_format($income, 2) ?></td>
+        </tr>
+        <tr>
+            <th>Total Expenses</th>
+            <td>₹<?= number_format($expense, 2) ?></td>
+        </tr>
+        <tr>
+            <th>Total Profit</th>
+            <td>₹<?= number_format($profit, 2) ?></td>
+        </tr>
+        <tr>
+            <th>Per Partner Share (4 partners)</th>
+            <td>₹<?= number_format($partner_share, 2) ?></td>
+        </tr>
+        <tr>
+            <th>💼 Company Balance (after partner withdrawals)</th>
+            <td>₹<?= number_format($company_balance, 2) ?></td>
+        </tr>
+    </table>
+
+
+    <h3>💸 Partner Withdrawals</h3>
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Partner</th>
+            <th>Total Withdrawn</th>
+            <th>Remaining</th>
+        </tr>
+        <?php foreach ($withdrawals as $w): ?>
+            <tr>
+                <td><?= $w['name'] ?></td>
+                <td>₹<?= number_format($w['total'], 2) ?></td>
+                <td>₹<?= number_format($partner_share - $w['total'], 2) ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+</body>
+
+</html>

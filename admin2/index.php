@@ -2,61 +2,59 @@
 session_start();
 require_once 'config.php';
 
-if (isset($_SESSION['admin_id'])) {
+if (isset($_SESSION['user_id'])) {
     header("Location: dashboard.php");
     exit();
 }
 
 $error = '';
-$username = '';
+$email = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Implement rate limiting
-    if (isset($_SESSION['login_attempts']) && $_SESSION['login_attempts'] >= 5 && time() - $_SESSION['last_attempt'] < 2) {
+    // Rate limiting
+    if (isset($_SESSION['login_attempts']) && $_SESSION['login_attempts'] >= 5 && time() - $_SESSION['last_attempt'] < 300) {
         $error = "Too many failed attempts. Please try again after 5 minutes.";
     } else {
-        $username = filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING);
+        $email = filter_input(INPUT_POST, 'username', FILTER_SANITIZE_EMAIL); // Actually email
         $password = $_POST['password'];
 
-        if (empty($username) || empty($password)) {
+        if (empty($email) || empty($password)) {
             $error = "Please fill in all fields";
         } else {
-            $sql = "SELECT id, username, password FROM admins WHERE username = ?";
+            $sql = "SELECT id, name, email, password, role FROM users WHERE email = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("s", $username);
+            $stmt->bind_param("s", $email);
             $stmt->execute();
             $result = $stmt->get_result();
 
-            if ($result->num_rows == 1) {
+            if ($result->num_rows === 1) {
                 $user = $result->fetch_assoc();
+
                 if (password_verify($password, $user['password'])) {
-                    // Reset login attempts on successful login
+                    // Login success
                     unset($_SESSION['login_attempts']);
                     unset($_SESSION['last_attempt']);
 
-                    $_SESSION['admin_id'] = $user['id'];
-                    $_SESSION['username'] = $user['username'];
-
-                    // Set last login time
-                    $update_sql = "UPDATE admins SET last_login = NOW() WHERE id = ?";
-                    $update_stmt = $conn->prepare($update_sql);
-                    $update_stmt->bind_param("i", $user['id']);
-                    $update_stmt->execute();
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_name'] = $user['name'];
+                    $_SESSION['user_email'] = $user['email'];
+                    $_SESSION['user_role'] = $user['role'];
 
                     header("Location: dashboard.php");
                     exit();
                 }
             }
 
-            // Increment login attempts
-            $_SESSION['login_attempts'] = isset($_SESSION['login_attempts']) ? $_SESSION['login_attempts'] + 1 : 1;
+            // Login failed
+            $_SESSION['login_attempts'] = ($_SESSION['login_attempts'] ?? 0) + 1;
             $_SESSION['last_attempt'] = time();
 
-            $error = "Invalid username or password";
+            $error = "Invalid email or password";
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -119,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="login-container">
         <div class="login-logo">
-            <img src="assets/upparac6.png" alt="Logo">
+            <img src="assets/upparac6.jpg" alt="Logo">
         </div>
 
         <?php if ($error): ?>
@@ -134,8 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <span class="input-group-text">
                         <i class="fas fa-user"></i>
                     </span>
-                    <input type="text" class="form-control" name="username" placeholder="Username"
-                           value="<?php echo htmlspecialchars($username); ?>" required>
+                    <input type="text" class="form-control" name="username" placeholder="email"
+                           value="<?php echo htmlspecialchars($email); ?>" required>
                 </div>
             </div>
 
@@ -144,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <span class="input-group-text">
                         <i class="fas fa-lock"></i>
                     </span>
-                    <input type="password" class="form-control" name="password" placeholder="Password" required>
+                    <input type="password" class="form-control" name="password" placeholder="Password">
                 </div>
             </div>
 
